@@ -276,11 +276,10 @@ const WeightHistory = () => {
           
           // 将工作表转换为JSON，同时获取原始值和格式化值
           const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-            raw: true, // 获取原始值
+            raw: false, // 获取原始值
             rawNumbers: true, // 保持数字为数字
             defval: null // 设置默认值为null
           });
-          
           // 检查第一条记录，了解数据结构
           if (jsonData.length > 0) {
             console.log('第一条记录样本:', jsonData[0]);
