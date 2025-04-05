@@ -4,8 +4,7 @@
   "rewrites": [
     {
       "source": "/.*",
-      "destination": "/index.html",
-      "handle": "filesystem"
+      "destination": "/index.html"
     }
   ]
 }
