@@ -177,7 +177,7 @@ const RecordForm = () => {
                 onChange={handleChange}
                 fullWidth
                 required
-                inputProps={{ step: '0.1', min: '0' }}
+                inputProps={{ step: '0.01', min: '0' }}
               />
             </Grid>
 
