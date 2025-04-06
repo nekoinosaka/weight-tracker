@@ -22,7 +22,7 @@ const DeepSeek = () => {
         throw new Error(error.message || '请求失败');
       }
       
-      setResponse(data);
+      setResponse(data || '没有找到答案');
     } catch (err) {
       console.error('DeepSeek API 调用错误:', err);
       setError(err.message || '发生错误，请稍后再试');
