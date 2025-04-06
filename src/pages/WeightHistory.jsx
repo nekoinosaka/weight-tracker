@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+// WeightHistory.js
 import {
   Box,
   Typography,
@@ -22,7 +22,6 @@ import {
   CircularProgress,
   Rating,
   Tooltip,
-  Stack,
   Menu,
   MenuItem,
   Checkbox,
@@ -45,515 +44,49 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import * as XLSX from "xlsx";
 import { useAuth } from "../contexts/AuthContext";
-import { recordService } from "../services/supabase";
+import { useWeightHistory } from "../hooks/useWeightHistory";
 
 const WeightHistory = () => {
   const { user } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [records, setRecords] = useState([]);
-  const [filteredRecords, setFilteredRecords] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [deleteDialog, setDeleteDialog] = useState({
-    open: false,
-    recordId: null,
-  });
-  const [bulkDeleteDialog, setBulkDeleteDialog] = useState({
-    open: false,
-    recordIds: [],
-  });
-  const [selectedRecords, setSelectedRecords] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-  const [importLoading, setImportLoading] = useState(false);
-  const [importMenuAnchor, setImportMenuAnchor] = useState(null);
-  const [showWeight, setShowWeight] = useState(false); // 添加控制体重显示的状态
-  const [exportFileName, setExportFileName] = useState("健康记录数据");
-  const [exportDialog, setExportDialog] = useState(false);
 
-  useEffect(() => {
-    fetchRecords();
-  }, [user]);
-
-  useEffect(() => {
-    // 当搜索词或记录变化时，过滤记录
-    if (searchTerm.trim() === "") {
-      setFilteredRecords(records);
-    } else {
-      const filtered = records.filter((record) => {
-        const date = new Date(record.date).toLocaleDateString();
-        const weight = record.weight.toString();
-        const notes = record.notes || "";
-        const dietScore = record.diet_score?.toString() || "";
-        const waterScore = record.water_score?.toString() || "";
-        const exerciseScore = record.exercise_score?.toString() || "";
-        const moodScore = record.mood_score?.toString() || "";
-        const sleepScore = record.sleep_condition?.toString() || "";
-
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          date.includes(searchTerm) ||
-          weight.includes(searchTerm) ||
-          notes.toLowerCase().includes(searchLower) ||
-          dietScore.includes(searchTerm) ||
-          waterScore.includes(searchTerm) ||
-          exerciseScore.includes(searchTerm) ||
-          moodScore.includes(searchTerm) ||
-          sleepScore.includes(searchTerm)
-        );
-      });
-      setFilteredRecords(filtered);
-    }
-  }, [searchTerm, records]);
-
-  const fetchRecords = async () => {
-    try {
-      if (user) {
-        setLoading(true);
-        const data = await recordService.getRecords(user.id);
-        // 按日期排序（最新的在前）
-        const sortedData = [...data].sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
-        );
-        setRecords(sortedData);
-        setFilteredRecords(sortedData);
-      }
-    } catch (error) {
-      console.error("获取记录失败:", error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const handleDeleteClick = (recordId) => {
-    setDeleteDialog({
-      open: true,
-      recordId,
-    });
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      await recordService.deleteRecord(deleteDialog.recordId);
-      // 更新本地状态
-      setRecords((prevRecords) =>
-        prevRecords.filter((record) => record.id !== deleteDialog.recordId)
-      );
-      setDeleteDialog({ open: false, recordId: null });
-    } catch (error) {
-      console.error("删除记录失败:", error.message);
-    }
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteDialog({ open: false, recordId: null });
-  };
-
-  // 批量删除相关处理
-  const handleSelectRecord = (recordId) => {
-    setSelectedRecords((prev) => {
-      if (prev.includes(recordId)) {
-        return prev.filter((id) => id !== recordId);
-      } else {
-        return [...prev, recordId];
-      }
-    });
-  };
-
-  const handleSelectAll = (event) => {
-    const checked = event.target.checked;
-    setSelectAll(checked);
-    if (checked) {
-      // 选择所有过滤后的记录
-      setSelectedRecords(filteredRecords.map((record) => record.id));
-    } else {
-      // 取消所有选择
-      setSelectedRecords([]);
-    }
-  };
-
-  const handleBulkDeleteClick = () => {
-    if (selectedRecords.length === 0) return;
-    setBulkDeleteDialog({
-      open: true,
-      recordIds: selectedRecords,
-    });
-  };
-
-  const handleBulkDeleteConfirm = async () => {
-    try {
-      await recordService.bulkDeleteRecords(bulkDeleteDialog.recordIds);
-      // 更新本地状态
-      setRecords((prevRecords) =>
-        prevRecords.filter(
-          (record) => !bulkDeleteDialog.recordIds.includes(record.id)
-        )
-      );
-      // 重置选择状态
-      setSelectedRecords([]);
-      setSelectAll(false);
-      setBulkDeleteDialog({ open: false, recordIds: [] });
-    } catch (error) {
-      console.error("批量删除记录失败:", error.message);
-      alert(`批量删除失败: ${error.message}`);
-    }
-  };
-
-  const handleBulkDeleteCancel = () => {
-    setBulkDeleteDialog({ open: false, recordIds: [] });
-  };
-
-  // 导入菜单处理
-  const handleImportMenuOpen = (event) => {
-    setImportMenuAnchor(event.currentTarget);
-  };
-
-  const handleImportMenuClose = () => {
-    setImportMenuAnchor(null);
-  };
-
-  // 处理JSON文件导入
-  const handleJsonImport = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    handleImportMenuClose();
-
-    try {
-      setImportLoading(true);
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        try {
-          const content = e.target.result;
-          const records = JSON.parse(content);
-
-          if (!Array.isArray(records)) {
-            alert("导入的文件格式不正确，请确保是有效的JSON数组");
-            return;
-          }
-
-          // 确保每条记录都有user_id
-          const recordsWithUserId = records.map((record) => ({
-            ...record,
-            user_id: user.id,
-          }));
-
-          // 检查是否有重复日期
-          const dates = recordsWithUserId.map((record) => record.date);
-          const duplicateDates = await recordService.checkDuplicateDates(
-            user.id,
-            dates
-          );
-
-          if (duplicateDates.length > 0) {
-            // 格式化日期列表以便于阅读
-            const formattedDates = duplicateDates
-              .map((date) => new Date(date).toLocaleDateString())
-              .join(", ");
-
-            alert(
-              `导入失败：存在日期相同的数据，请修改导入的文件。\n重复的日期: ${formattedDates}`
-            );
-            return;
-          }
-
-          // 使用批量导入API
-          await recordService.bulkAddRecords(recordsWithUserId);
-          alert(`成功导入 ${records.length} 条记录`);
-
-          // 重新获取记录
-          fetchRecords();
-        } catch (error) {
-          console.error("解析或导入数据失败:", error);
-          alert(`导入失败: ${error.message}`);
-        } finally {
-          setImportLoading(false);
-        }
-      };
-
-      reader.onerror = () => {
-        alert("读取文件失败");
-        setImportLoading(false);
-      };
-
-      reader.readAsText(file);
-    } catch (error) {
-      console.error("导入过程出错:", error);
-      alert(`导入过程出错: ${error.message}`);
-      setImportLoading(false);
-    }
-  };
-
-  // 处理Excel文件导入
-  const handleExcelImport = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    handleImportMenuClose();
-
-    try {
-      setImportLoading(true);
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        try {
-          const data = new Uint8Array(e.target.result);
-
-          // 设置日期处理选项，确保正确解析日期
-          const workbook = XLSX.read(data, {
-            type: "array",
-            cellDates: true, // 将日期单元格转换为JS日期对象
-            dateNF: "yyyy-mm-dd", // 指定日期格式
-          });
-
-          // 获取第一个工作表
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-
-          // 直接访问工作表单元格，了解数据结构
-          console.log("工作表数据:", worksheet);
-
-          // 将工作表转换为JSON，同时获取原始值和格式化值
-          const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-            raw: false, // 获取原始值
-            rawNumbers: true, // 保持数字为数字
-            defval: null, // 设置默认值为null
-          });
-          // 检查第一条记录，了解数据结构
-          if (jsonData.length > 0) {
-            console.log("第一条记录样本:", jsonData[0]);
-          }
-
-          // 检查第一条记录，了解数据结构
-          if (jsonData.length > 0) {
-            console.log("第一条记录样本:", jsonData[0]);
-          }
-
-          if (!Array.isArray(jsonData) || jsonData.length === 0) {
-            alert("Excel文件中没有找到有效数据");
-            return;
-          }
-
-          // 映射Excel数据到应用程序所需的格式
-          const mappedRecords = jsonData.map((row) => {
-            // 尝试识别并映射列名
-            const record = {
-              user_id: user.id,
-              weight: parseFloat(row.weight || row.Weight || row["体重"] || 0),
-              notes: row.notes || row.Notes || row["备注"] || "",
-              diet_score: parseInt(
-                row.diet_score || row["饮食评分"] || row["Diet Score"] || 0
-              ),
-              water_score: parseInt(
-                row.water_score || row["饮水评分"] || row["Water Score"] || 0
-              ),
-              exercise_score: parseInt(
-                row.exercise_score ||
-                  row["运动评分"] ||
-                  row["Exercise Score"] ||
-                  0
-              ),
-              mood_score: parseInt(
-                row.mood_score || row["心情评分"] || row["Mood Score"] || 0
-              ),
-              sleep_condition: parseInt(
-                row.sleep_condition ||
-                  row["睡眠评分"] ||
-                  row["Sleep Score"] ||
-                  0
-              ),
-              has_bowel_movement: Boolean(
-                row.has_bowel_movement ||
-                  row["排便情况"] ||
-                  row["Bowel Movement"] ||
-                  false
-              ),
-            };
-
-            // 处理日期 - 优先使用原始单元格数据
-            let dateValue = row.date || row.Date || row["日期"];
-
-            // 如果日期值是日期对象，直接格式化
-            if (dateValue instanceof Date) {
-              record.date = dateValue.toISOString().split("T")[0];
-            }
-            // 如果是字符串，尝试解析
-            else if (typeof dateValue === "string") {
-              // 检查是否已经是YYYY-MM-DD格式
-              if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                record.date = dateValue;
-              } else {
-                // 尝试解析其他格式的日期字符串
-                const dateObj = new Date(dateValue);
-                if (!isNaN(dateObj.getTime())) {
-                  record.date = dateObj.toISOString().split("T")[0];
-                } else {
-                  // 如果无法解析，使用当前日期
-                  record.date = new Date().toISOString().split("T")[0];
-                }
-              }
-            }
-            // 如果是数字（Excel序列号），转换为日期
-            else if (typeof dateValue === "number") {
-              // Excel日期是从1900年1月1日开始的天数
-              // 需要转换为JavaScript日期
-              const excelEpoch = new Date(1899, 11, 30); // Excel的起始日期是1900年1月0日
-              const msPerDay = 24 * 60 * 60 * 1000;
-              const dateObj = new Date(
-                excelEpoch.getTime() + dateValue * msPerDay
-              );
-              record.date = dateObj.toISOString().split("T")[0];
-            }
-            // 如果没有日期值，使用当前日期
-            else {
-              record.date = new Date().toISOString().split("T")[0];
-            }
-
-            // 验证体重是否为有效数字
-            if (isNaN(record.weight) || record.weight <= 0) {
-              record.weight = 0; // 设置默认值或标记为无效
-            }
-
-            return record;
-          });
-
-          // 过滤掉无效记录（例如体重为0的记录）
-          const validRecords = mappedRecords.filter(
-            (record) => record.weight > 0
-          );
-
-          if (validRecords.length === 0) {
-            alert("没有找到有效的记录数据，请确保Excel文件包含体重列");
-            return;
-          }
-
-          // 检查是否有重复日期
-          const dates = validRecords.map((record) => record.date);
-          const duplicateDates = await recordService.checkDuplicateDates(
-            user.id,
-            dates
-          );
-
-          if (duplicateDates.length > 0) {
-            // 格式化日期列表以便于阅读
-            const formattedDates = duplicateDates
-              .map((date) => new Date(date).toLocaleDateString())
-              .join(", ");
-
-            alert(
-              `导入失败：存在日期相同的数据，请修改导入的文件。\n重复的日期: ${formattedDates}`
-            );
-            return;
-          }
-
-          // 使用批量导入API
-          await recordService.bulkAddRecords(validRecords);
-          alert(`成功导入 ${validRecords.length} 条记录`);
-
-          // 重新获取记录
-          fetchRecords();
-        } catch (error) {
-          console.error("解析或导入Excel数据失败:", error);
-          alert(`导入失败: ${error.message}`);
-        } finally {
-          setImportLoading(false);
-        }
-      };
-
-      reader.onerror = () => {
-        alert("读取Excel文件失败");
-        setImportLoading(false);
-      };
-
-      reader.readAsArrayBuffer(file);
-    } catch (error) {
-      console.error("导入Excel过程出错:", error);
-      alert(`导入过程出错: ${error.message}`);
-      setImportLoading(false);
-    }
-  };
-
-  // 兼容旧版本的导入函数
-  const handleImport = handleJsonImport;
-
-  // 导出Excel功能
-  const handleExportExcel = () => {
-    // 打开导出对话框
-    setExportDialog(true);
-  };
-
-  // 确认导出Excel
-  const handleExportConfirm = () => {
-    try {
-      // 准备导出数据
-      const exportData = filteredRecords.map((record) => ({
-        日期: new Date(record.date).toLocaleDateString(),
-        "体重(kg)": record.weight,
-        饮食评分: record.diet_score || 0,
-        饮水评分: record.water_score || 0,
-        运动评分: record.exercise_score || 0,
-        心情评分: record.mood_score || 0,
-        睡眠评分: record.sleep_condition || 0,
-        排便情况: record.has_bowel_movement ? "是" : "否",
-        备注: record.notes || "",
-      }));
-
-      // 创建工作表
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-
-      // 设置列宽
-      const columnWidths = [
-        { wch: 12 }, // 日期
-        { wch: 10 }, // 体重
-        { wch: 10 }, // 饮食评分
-        { wch: 10 }, // 饮水评分
-        { wch: 10 }, // 运动评分
-        { wch: 10 }, // 心情评分
-        { wch: 10 }, // 睡眠评分
-        { wch: 10 }, // 排便情况
-        { wch: 30 }, // 备注
-      ];
-      worksheet["!cols"] = columnWidths;
-
-      // 创建工作簿
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "健康记录");
-
-      // 生成Excel文件并下载
-      XLSX.writeFile(workbook, `${exportFileName}.xlsx`);
-
-      // 关闭对话框
-      setExportDialog(false);
-    } catch (error) {
-      console.error("导出Excel失败:", error);
-      alert(`导出失败: ${error.message}`);
-      setExportDialog(false);
-    }
-  };
-
-  // 取消导出
-  const handleExportCancel = () => {
-    setExportDialog(false);
-  };
-
-  // 计算体重变化
-  const getWeightChange = (index) => {
-    if (index === filteredRecords.length - 1) return null; // 第一条记录没有变化
-
-    const currentWeight = filteredRecords[index].weight;
-    const previousWeight = filteredRecords[index + 1].weight;
-    const change = currentWeight - previousWeight;
-
-    return {
-      value: change.toFixed(1),
-      isGain: change > 0,
-    };
-  };
+  const {
+    records,
+    filteredRecords,
+    loading,
+    searchTerm,
+    deleteDialog,
+    bulkDeleteDialog,
+    selectedRecords,
+    selectAll,
+    importLoading,
+    importMenuAnchor,
+    showWeight,
+    exportFileName,
+    exportDialog,
+    handleSearchChange,
+    handleDeleteClick,
+    handleDeleteConfirm,
+    handleDeleteCancel,
+    handleSelectRecord,
+    handleSelectAll,
+    handleBulkDeleteClick,
+    handleBulkDeleteConfirm,
+    handleBulkDeleteCancel,
+    handleImportMenuOpen,
+    handleImportMenuClose,
+    handleJsonImport,
+    handleExcelImport,
+    handleImport,
+    handleExportExcel,
+    handleExportConfirm,
+    handleExportCancel,
+    getWeightChange,
+    toggleShowWeight,
+    setExportFileName,
+  } = useWeightHistory(user);
 
   if (loading) {
     return (
@@ -570,7 +103,6 @@ const WeightHistory = () => {
     );
   }
 
-  // 移动端卡片式布局
   const MobileCardView = () => (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 2 }}>
@@ -598,10 +130,7 @@ const WeightHistory = () => {
           </Button>
           <FormControlLabel
             control={
-              <Switch
-                checked={showWeight}
-                onChange={() => setShowWeight(!showWeight)}
-              />
+              <Switch checked={showWeight} onChange={toggleShowWeight} />
             }
             label="显示体重"
             sx={{ ml: "auto" }}
@@ -699,7 +228,6 @@ const WeightHistory = () => {
         体重历史记录
       </Typography>
 
-      {/* 搜索和批量操作工具栏 */}
       <Box
         sx={{
           display: "flex",
@@ -733,7 +261,7 @@ const WeightHistory = () => {
           control={
             <Checkbox
               checked={showWeight}
-              onChange={(e) => setShowWeight(e.target.checked)}
+              onChange={toggleShowWeight}
               color="primary"
             />
           }
@@ -999,7 +527,6 @@ const WeightHistory = () => {
         </TableContainer>
       )}
 
-      {/* 删除确认对话框 */}
       <Dialog open={deleteDialog.open} onClose={handleDeleteCancel}>
         <DialogTitle>确认删除</DialogTitle>
         <DialogContent>
@@ -1015,7 +542,6 @@ const WeightHistory = () => {
         </DialogActions>
       </Dialog>
 
-      {/* 批量删除确认对话框 */}
       <Dialog open={bulkDeleteDialog.open} onClose={handleBulkDeleteCancel}>
         <DialogTitle>确认批量删除</DialogTitle>
         <DialogContent>
@@ -1032,7 +558,6 @@ const WeightHistory = () => {
         </DialogActions>
       </Dialog>
 
-      {/* 导出Excel对话框 */}
       <Dialog open={exportDialog} onClose={handleExportCancel}>
         <DialogTitle>导出Excel</DialogTitle>
         <DialogContent>
