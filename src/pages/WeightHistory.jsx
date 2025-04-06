@@ -1,51 +1,76 @@
-import { useState, useEffect } from 'react';
-import { 
-  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, IconButton, Chip, TextField, InputAdornment,
-  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
-  Button, CircularProgress, Rating, Tooltip, Stack, Menu, MenuItem,
-  Checkbox, FormControlLabel, useMediaQuery, useTheme
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
-import SearchIcon from '@mui/icons-material/Search';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import BedtimeIcon from '@mui/icons-material/Bedtime';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import * as XLSX from 'xlsx';
-import { useAuth } from '../contexts/AuthContext';
-import { recordService } from '../services/supabase';
+import { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Chip,
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  CircularProgress,
+  Rating,
+  Tooltip,
+  Stack,
+  Menu,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  useMediaQuery,
+  useTheme,
+  Switch,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import SearchIcon from "@mui/icons-material/Search";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import WaterDropIcon from "@mui/icons-material/WaterDrop";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import BedtimeIcon from "@mui/icons-material/Bedtime";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import * as XLSX from "xlsx";
+import { useAuth } from "../contexts/AuthContext";
+import { recordService } from "../services/supabase";
 
 const WeightHistory = () => {
   const { user } = useAuth();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
-    recordId: null
+    recordId: null,
   });
   const [bulkDeleteDialog, setBulkDeleteDialog] = useState({
     open: false,
-    recordIds: []
+    recordIds: [],
   });
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const [importMenuAnchor, setImportMenuAnchor] = useState(null);
-  const [showWeight, setShowWeight] = useState(true); // 添加控制体重显示的状态
-  const [exportFileName, setExportFileName] = useState('健康记录数据');
+  const [showWeight, setShowWeight] = useState(false); // 添加控制体重显示的状态
+  const [exportFileName, setExportFileName] = useState("健康记录数据");
   const [exportDialog, setExportDialog] = useState(false);
 
   useEffect(() => {
@@ -54,19 +79,19 @@ const WeightHistory = () => {
 
   useEffect(() => {
     // 当搜索词或记录变化时，过滤记录
-    if (searchTerm.trim() === '') {
+    if (searchTerm.trim() === "") {
       setFilteredRecords(records);
     } else {
-      const filtered = records.filter(record => {
+      const filtered = records.filter((record) => {
         const date = new Date(record.date).toLocaleDateString();
         const weight = record.weight.toString();
-        const notes = record.notes || '';
-        const dietScore = record.diet_score?.toString() || '';
-        const waterScore = record.water_score?.toString() || '';
-        const exerciseScore = record.exercise_score?.toString() || '';
-        const moodScore = record.mood_score?.toString() || '';
-        const sleepScore = record.sleep_condition?.toString() || '';
-        
+        const notes = record.notes || "";
+        const dietScore = record.diet_score?.toString() || "";
+        const waterScore = record.water_score?.toString() || "";
+        const exerciseScore = record.exercise_score?.toString() || "";
+        const moodScore = record.mood_score?.toString() || "";
+        const sleepScore = record.sleep_condition?.toString() || "";
+
         const searchLower = searchTerm.toLowerCase();
         return (
           date.includes(searchTerm) ||
@@ -89,12 +114,14 @@ const WeightHistory = () => {
         setLoading(true);
         const data = await recordService.getRecords(user.id);
         // 按日期排序（最新的在前）
-        const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sortedData = [...data].sort(
+          (a, b) => new Date(b.date) - new Date(a.date)
+        );
         setRecords(sortedData);
         setFilteredRecords(sortedData);
       }
     } catch (error) {
-      console.error('获取记录失败:', error.message);
+      console.error("获取记录失败:", error.message);
     } finally {
       setLoading(false);
     }
@@ -107,7 +134,7 @@ const WeightHistory = () => {
   const handleDeleteClick = (recordId) => {
     setDeleteDialog({
       open: true,
-      recordId
+      recordId,
     });
   };
 
@@ -115,10 +142,12 @@ const WeightHistory = () => {
     try {
       await recordService.deleteRecord(deleteDialog.recordId);
       // 更新本地状态
-      setRecords(prevRecords => prevRecords.filter(record => record.id !== deleteDialog.recordId));
+      setRecords((prevRecords) =>
+        prevRecords.filter((record) => record.id !== deleteDialog.recordId)
+      );
       setDeleteDialog({ open: false, recordId: null });
     } catch (error) {
-      console.error('删除记录失败:', error.message);
+      console.error("删除记录失败:", error.message);
     }
   };
 
@@ -128,9 +157,9 @@ const WeightHistory = () => {
 
   // 批量删除相关处理
   const handleSelectRecord = (recordId) => {
-    setSelectedRecords(prev => {
+    setSelectedRecords((prev) => {
       if (prev.includes(recordId)) {
-        return prev.filter(id => id !== recordId);
+        return prev.filter((id) => id !== recordId);
       } else {
         return [...prev, recordId];
       }
@@ -142,7 +171,7 @@ const WeightHistory = () => {
     setSelectAll(checked);
     if (checked) {
       // 选择所有过滤后的记录
-      setSelectedRecords(filteredRecords.map(record => record.id));
+      setSelectedRecords(filteredRecords.map((record) => record.id));
     } else {
       // 取消所有选择
       setSelectedRecords([]);
@@ -153,7 +182,7 @@ const WeightHistory = () => {
     if (selectedRecords.length === 0) return;
     setBulkDeleteDialog({
       open: true,
-      recordIds: selectedRecords
+      recordIds: selectedRecords,
     });
   };
 
@@ -161,13 +190,17 @@ const WeightHistory = () => {
     try {
       await recordService.bulkDeleteRecords(bulkDeleteDialog.recordIds);
       // 更新本地状态
-      setRecords(prevRecords => prevRecords.filter(record => !bulkDeleteDialog.recordIds.includes(record.id)));
+      setRecords((prevRecords) =>
+        prevRecords.filter(
+          (record) => !bulkDeleteDialog.recordIds.includes(record.id)
+        )
+      );
       // 重置选择状态
       setSelectedRecords([]);
       setSelectAll(false);
       setBulkDeleteDialog({ open: false, recordIds: [] });
     } catch (error) {
-      console.error('批量删除记录失败:', error.message);
+      console.error("批量删除记录失败:", error.message);
       alert(`批量删除失败: ${error.message}`);
     }
   };
@@ -194,59 +227,64 @@ const WeightHistory = () => {
     try {
       setImportLoading(true);
       const reader = new FileReader();
-      
+
       reader.onload = async (e) => {
         try {
           const content = e.target.result;
           const records = JSON.parse(content);
-          
+
           if (!Array.isArray(records)) {
-            alert('导入的文件格式不正确，请确保是有效的JSON数组');
+            alert("导入的文件格式不正确，请确保是有效的JSON数组");
             return;
           }
-          
+
           // 确保每条记录都有user_id
-          const recordsWithUserId = records.map(record => ({
+          const recordsWithUserId = records.map((record) => ({
             ...record,
-            user_id: user.id
+            user_id: user.id,
           }));
-          
+
           // 检查是否有重复日期
-          const dates = recordsWithUserId.map(record => record.date);
-          const duplicateDates = await recordService.checkDuplicateDates(user.id, dates);
-          
+          const dates = recordsWithUserId.map((record) => record.date);
+          const duplicateDates = await recordService.checkDuplicateDates(
+            user.id,
+            dates
+          );
+
           if (duplicateDates.length > 0) {
             // 格式化日期列表以便于阅读
             const formattedDates = duplicateDates
-              .map(date => new Date(date).toLocaleDateString())
-              .join(', ');
-            
-            alert(`导入失败：存在日期相同的数据，请修改导入的文件。\n重复的日期: ${formattedDates}`);
+              .map((date) => new Date(date).toLocaleDateString())
+              .join(", ");
+
+            alert(
+              `导入失败：存在日期相同的数据，请修改导入的文件。\n重复的日期: ${formattedDates}`
+            );
             return;
           }
-          
+
           // 使用批量导入API
           await recordService.bulkAddRecords(recordsWithUserId);
           alert(`成功导入 ${records.length} 条记录`);
-          
+
           // 重新获取记录
           fetchRecords();
         } catch (error) {
-          console.error('解析或导入数据失败:', error);
+          console.error("解析或导入数据失败:", error);
           alert(`导入失败: ${error.message}`);
         } finally {
           setImportLoading(false);
         }
       };
-      
+
       reader.onerror = () => {
-        alert('读取文件失败');
+        alert("读取文件失败");
         setImportLoading(false);
       };
-      
+
       reader.readAsText(file);
     } catch (error) {
-      console.error('导入过程出错:', error);
+      console.error("导入过程出错:", error);
       alert(`导入过程出错: ${error.message}`);
       setImportLoading(false);
     }
@@ -261,70 +299,91 @@ const WeightHistory = () => {
     try {
       setImportLoading(true);
       const reader = new FileReader();
-      
+
       reader.onload = async (e) => {
         try {
           const data = new Uint8Array(e.target.result);
 
           // 设置日期处理选项，确保正确解析日期
-          const workbook = XLSX.read(data, { 
-            type: 'array',
+          const workbook = XLSX.read(data, {
+            type: "array",
             cellDates: true, // 将日期单元格转换为JS日期对象
-            dateNF: 'yyyy-mm-dd' // 指定日期格式
+            dateNF: "yyyy-mm-dd", // 指定日期格式
           });
 
           // 获取第一个工作表
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
-          
+
           // 直接访问工作表单元格，了解数据结构
-          console.log('工作表数据:', worksheet);
-          
+          console.log("工作表数据:", worksheet);
+
           // 将工作表转换为JSON，同时获取原始值和格式化值
           const jsonData = XLSX.utils.sheet_to_json(worksheet, {
             raw: false, // 获取原始值
             rawNumbers: true, // 保持数字为数字
-            defval: null // 设置默认值为null
+            defval: null, // 设置默认值为null
           });
           // 检查第一条记录，了解数据结构
           if (jsonData.length > 0) {
-            console.log('第一条记录样本:', jsonData[0]);
+            console.log("第一条记录样本:", jsonData[0]);
           }
-          
+
           // 检查第一条记录，了解数据结构
           if (jsonData.length > 0) {
-            console.log('第一条记录样本:', jsonData[0]);
+            console.log("第一条记录样本:", jsonData[0]);
           }
-          
+
           if (!Array.isArray(jsonData) || jsonData.length === 0) {
-            alert('Excel文件中没有找到有效数据');
+            alert("Excel文件中没有找到有效数据");
             return;
           }
-          
+
           // 映射Excel数据到应用程序所需的格式
-          const mappedRecords = jsonData.map(row => {
+          const mappedRecords = jsonData.map((row) => {
             // 尝试识别并映射列名
             const record = {
               user_id: user.id,
-              weight: parseFloat(row.weight || row.Weight || row['体重'] || 0),
-              notes: row.notes || row.Notes || row['备注'] || '',
-              diet_score: parseInt(row.diet_score || row['饮食评分'] || row['Diet Score'] || 0),
-              water_score: parseInt(row.water_score || row['饮水评分'] || row['Water Score'] || 0),
-              exercise_score: parseInt(row.exercise_score || row['运动评分'] || row['Exercise Score'] || 0),
-              mood_score: parseInt(row.mood_score || row['心情评分'] || row['Mood Score'] || 0),
-              sleep_condition: parseInt(row.sleep_condition || row['睡眠评分'] || row['Sleep Score'] || 0),
-              has_bowel_movement: Boolean(row.has_bowel_movement || row['排便情况'] || row['Bowel Movement'] || false)
+              weight: parseFloat(row.weight || row.Weight || row["体重"] || 0),
+              notes: row.notes || row.Notes || row["备注"] || "",
+              diet_score: parseInt(
+                row.diet_score || row["饮食评分"] || row["Diet Score"] || 0
+              ),
+              water_score: parseInt(
+                row.water_score || row["饮水评分"] || row["Water Score"] || 0
+              ),
+              exercise_score: parseInt(
+                row.exercise_score ||
+                  row["运动评分"] ||
+                  row["Exercise Score"] ||
+                  0
+              ),
+              mood_score: parseInt(
+                row.mood_score || row["心情评分"] || row["Mood Score"] || 0
+              ),
+              sleep_condition: parseInt(
+                row.sleep_condition ||
+                  row["睡眠评分"] ||
+                  row["Sleep Score"] ||
+                  0
+              ),
+              has_bowel_movement: Boolean(
+                row.has_bowel_movement ||
+                  row["排便情况"] ||
+                  row["Bowel Movement"] ||
+                  false
+              ),
             };
-            
+
             // 处理日期 - 优先使用原始单元格数据
-            let dateValue = row.date || row.Date || row['日期'];
-            
+            let dateValue = row.date || row.Date || row["日期"];
+
             // 如果日期值是日期对象，直接格式化
             if (dateValue instanceof Date) {
-              record.date = dateValue.toISOString().split('T')[0];
+              record.date = dateValue.toISOString().split("T")[0];
             }
             // 如果是字符串，尝试解析
-            else if (typeof dateValue === 'string') {
+            else if (typeof dateValue === "string") {
               // 检查是否已经是YYYY-MM-DD格式
               if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
                 record.date = dateValue;
@@ -332,84 +391,93 @@ const WeightHistory = () => {
                 // 尝试解析其他格式的日期字符串
                 const dateObj = new Date(dateValue);
                 if (!isNaN(dateObj.getTime())) {
-                  record.date = dateObj.toISOString().split('T')[0];
+                  record.date = dateObj.toISOString().split("T")[0];
                 } else {
                   // 如果无法解析，使用当前日期
-                  record.date = new Date().toISOString().split('T')[0];
+                  record.date = new Date().toISOString().split("T")[0];
                 }
               }
             }
             // 如果是数字（Excel序列号），转换为日期
-            else if (typeof dateValue === 'number') {
+            else if (typeof dateValue === "number") {
               // Excel日期是从1900年1月1日开始的天数
               // 需要转换为JavaScript日期
               const excelEpoch = new Date(1899, 11, 30); // Excel的起始日期是1900年1月0日
               const msPerDay = 24 * 60 * 60 * 1000;
-              const dateObj = new Date(excelEpoch.getTime() + dateValue * msPerDay);
-              record.date = dateObj.toISOString().split('T')[0];
+              const dateObj = new Date(
+                excelEpoch.getTime() + dateValue * msPerDay
+              );
+              record.date = dateObj.toISOString().split("T")[0];
             }
             // 如果没有日期值，使用当前日期
             else {
-              record.date = new Date().toISOString().split('T')[0];
+              record.date = new Date().toISOString().split("T")[0];
             }
-            
+
             // 验证体重是否为有效数字
             if (isNaN(record.weight) || record.weight <= 0) {
               record.weight = 0; // 设置默认值或标记为无效
             }
-            
+
             return record;
           });
-          
+
           // 过滤掉无效记录（例如体重为0的记录）
-          const validRecords = mappedRecords.filter(record => record.weight > 0);
-          
+          const validRecords = mappedRecords.filter(
+            (record) => record.weight > 0
+          );
+
           if (validRecords.length === 0) {
-            alert('没有找到有效的记录数据，请确保Excel文件包含体重列');
+            alert("没有找到有效的记录数据，请确保Excel文件包含体重列");
             return;
           }
-          
+
           // 检查是否有重复日期
-          const dates = validRecords.map(record => record.date);
-          const duplicateDates = await recordService.checkDuplicateDates(user.id, dates);
-          
+          const dates = validRecords.map((record) => record.date);
+          const duplicateDates = await recordService.checkDuplicateDates(
+            user.id,
+            dates
+          );
+
           if (duplicateDates.length > 0) {
             // 格式化日期列表以便于阅读
             const formattedDates = duplicateDates
-              .map(date => new Date(date).toLocaleDateString())
-              .join(', ');
-            
-            alert(`导入失败：存在日期相同的数据，请修改导入的文件。\n重复的日期: ${formattedDates}`);
+              .map((date) => new Date(date).toLocaleDateString())
+              .join(", ");
+
+            alert(
+              `导入失败：存在日期相同的数据，请修改导入的文件。\n重复的日期: ${formattedDates}`
+            );
             return;
           }
-          
+
           // 使用批量导入API
           await recordService.bulkAddRecords(validRecords);
           alert(`成功导入 ${validRecords.length} 条记录`);
-          
+
           // 重新获取记录
           fetchRecords();
         } catch (error) {
-          console.error('解析或导入Excel数据失败:', error);
+          console.error("解析或导入Excel数据失败:", error);
           alert(`导入失败: ${error.message}`);
         } finally {
           setImportLoading(false);
         }
       };
-      
+
       reader.onerror = () => {
-        alert('读取Excel文件失败');
+        alert("读取Excel文件失败");
         setImportLoading(false);
       };
-      
+
       reader.readAsArrayBuffer(file);
     } catch (error) {
-      console.error('导入Excel过程出错:', error);
+      console.error("导入Excel过程出错:", error);
       alert(`导入过程出错: ${error.message}`);
       setImportLoading(false);
     }
   };
-  
+
   // 兼容旧版本的导入函数
   const handleImport = handleJsonImport;
 
@@ -423,21 +491,21 @@ const WeightHistory = () => {
   const handleExportConfirm = () => {
     try {
       // 准备导出数据
-      const exportData = filteredRecords.map(record => ({
-        '日期': new Date(record.date).toLocaleDateString(),
-        '体重(kg)': record.weight,
-        '饮食评分': record.diet_score || 0,
-        '饮水评分': record.water_score || 0,
-        '运动评分': record.exercise_score || 0,
-        '心情评分': record.mood_score || 0,
-        '睡眠评分': record.sleep_condition || 0,
-        '排便情况': record.has_bowel_movement ? '是' : '否',
-        '备注': record.notes || ''
+      const exportData = filteredRecords.map((record) => ({
+        日期: new Date(record.date).toLocaleDateString(),
+        "体重(kg)": record.weight,
+        饮食评分: record.diet_score || 0,
+        饮水评分: record.water_score || 0,
+        运动评分: record.exercise_score || 0,
+        心情评分: record.mood_score || 0,
+        睡眠评分: record.sleep_condition || 0,
+        排便情况: record.has_bowel_movement ? "是" : "否",
+        备注: record.notes || "",
       }));
 
       // 创建工作表
       const worksheet = XLSX.utils.json_to_sheet(exportData);
-      
+
       // 设置列宽
       const columnWidths = [
         { wch: 12 }, // 日期
@@ -448,13 +516,13 @@ const WeightHistory = () => {
         { wch: 10 }, // 心情评分
         { wch: 10 }, // 睡眠评分
         { wch: 10 }, // 排便情况
-        { wch: 30 }  // 备注
+        { wch: 30 }, // 备注
       ];
-      worksheet['!cols'] = columnWidths;
+      worksheet["!cols"] = columnWidths;
 
       // 创建工作簿
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, '健康记录');
+      XLSX.utils.book_append_sheet(workbook, worksheet, "健康记录");
 
       // 生成Excel文件并下载
       XLSX.writeFile(workbook, `${exportFileName}.xlsx`);
@@ -462,7 +530,7 @@ const WeightHistory = () => {
       // 关闭对话框
       setExportDialog(false);
     } catch (error) {
-      console.error('导出Excel失败:', error);
+      console.error("导出Excel失败:", error);
       alert(`导出失败: ${error.message}`);
       setExportDialog(false);
     }
@@ -476,41 +544,181 @@ const WeightHistory = () => {
   // 计算体重变化
   const getWeightChange = (index) => {
     if (index === filteredRecords.length - 1) return null; // 第一条记录没有变化
-    
+
     const currentWeight = filteredRecords[index].weight;
     const previousWeight = filteredRecords[index + 1].weight;
     const change = currentWeight - previousWeight;
-    
+
     return {
       value: change.toFixed(1),
-      isGain: change > 0
+      isGain: change > 0,
     };
   };
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "50vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
   }
 
-  return (
-    <Box sx={{ width: '100%' }}>
-      <Typography variant="h4" gutterBottom>体重历史记录</Typography>
-      
+  // 移动端卡片式布局
+  const MobileCardView = () => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 2 }}>
+        <TextField
+          size="small"
+          variant="outlined"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          placeholder="搜索记录"
+          sx={{ mb: 1 }}
+        />
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            onClick={handleImportMenuOpen}
+            variant="contained"
+            startIcon={<UploadFileIcon />}
+            endIcon={<ArrowDropDownIcon />}
+            disabled={importLoading}
+            size="small"
+          >
+            导入
+          </Button>
+          <Button onClick={handleExportExcel} variant="outlined" size="small">
+            导出
+          </Button>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showWeight}
+                onChange={() => setShowWeight(!showWeight)}
+              />
+            }
+            label="显示体重"
+            sx={{ ml: "auto" }}
+          />
+        </Box>
+      </Box>
+      {filteredRecords.map((record, index) => (
+        <Paper
+          key={record.id}
+          sx={{ p: 3, borderRadius: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              {new Date(record.date).toLocaleDateString()}
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {getWeightChange(index) && (
+                <Chip
+                  label={
+                    showWeight
+                      ? `${getWeightChange(index).isGain ? "+" : "-"}${Math.abs(
+                          getWeightChange(index).value
+                        )} kg`
+                      : "***"
+                  }
+                  color={getWeightChange(index).isGain ? "error" : "success"}
+                  size="small"
+                />
+              )}
+              <Typography variant="h6" color="primary.main">
+                {showWeight ? `${record.weight} kg` : "***"}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
+            <Chip
+              icon={<RestaurantIcon fontSize="small" />}
+              label={`饮食: ${record.diet_score || 0}`}
+              size="small"
+            />
+            <Chip
+              icon={<WaterDropIcon fontSize="small" />}
+              label={`饮水: ${record.water_score || 0}`}
+              size="small"
+            />
+            <Chip
+              icon={<FitnessCenterIcon fontSize="small" />}
+              label={`运动: ${record.exercise_score || 0}`}
+              size="small"
+            />
+            <Chip
+              icon={
+                record.has_bowel_movement ? (
+                  <CheckCircleIcon fontSize="small" />
+                ) : (
+                  <CancelIcon fontSize="small" />
+                )
+              }
+              label={`排便: ${record.has_bowel_movement ? "是" : "否"}`}
+              size="small"
+            />
+          </Box>
+
+          {record.notes && (
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              {record.notes}
+            </Typography>
+          )}
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <IconButton
+              onClick={() => handleDeleteClick(record.id)}
+              color="error"
+              size="small"
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Paper>
+      ))}
+    </Box>
+  );
+
+  return isMobile ? (
+    <Box sx={{ width: "100%" }}>
+      <Typography variant="h4" gutterBottom>
+        体重历史记录
+      </Typography>
+      <MobileCardView />
+    </Box>
+  ) : (
+    <Box sx={{ width: "100%" }}>
+      <Typography variant="h4" gutterBottom>
+        体重历史记录
+      </Typography>
+
       {/* 搜索和批量操作工具栏 */}
-      <Box sx={{ display: 'flex', mb: 2, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          mb: 2,
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
         <TextField
           placeholder="搜索记录..."
           variant="outlined"
           size="small"
           value={searchTerm}
           onChange={handleSearchChange}
-          sx={{ 
-            flexGrow: 1, 
-            maxWidth: { xs: '100%', sm: 300 },
-            mb: { xs: 1, sm: 0 }
+          sx={{
+            flexGrow: 1,
+            maxWidth: { xs: "100%", sm: 300 },
+            mb: { xs: 1, sm: 0 },
           }}
           InputProps={{
             startAdornment: (
@@ -520,7 +728,7 @@ const WeightHistory = () => {
             ),
           }}
         />
-        
+
         <FormControlLabel
           control={
             <Checkbox
@@ -530,41 +738,41 @@ const WeightHistory = () => {
             />
           }
           label="显示体重数值"
-          sx={{ minWidth: '150px' }}
+          sx={{ minWidth: "150px" }}
         />
-        
+
         <Button
           variant="contained"
           startIcon={<UploadFileIcon />}
           endIcon={<ArrowDropDownIcon />}
           disabled={importLoading}
           onClick={handleImportMenuOpen}
-          sx={{ minWidth: '120px' }}
+          sx={{ minWidth: "120px" }}
         >
-          {importLoading ? '导入中...' : '导入数据'}
+          {importLoading ? "导入中..." : "导入数据"}
         </Button>
-        
+
         <Button
           variant="contained"
           color="success"
           startIcon={<FileDownloadIcon />}
           onClick={handleExportExcel}
-          sx={{ minWidth: '120px' }}
+          sx={{ minWidth: "120px" }}
         >
           导出Excel
         </Button>
-        
+
         <Button
           variant="contained"
           color="error"
           startIcon={<DeleteSweepIcon />}
           disabled={selectedRecords.length === 0}
           onClick={handleBulkDeleteClick}
-          sx={{ minWidth: '120px' }}
+          sx={{ minWidth: "120px" }}
         >
           批量删除 ({selectedRecords.length})
         </Button>
-        
+
         <Menu
           anchorEl={importMenuAnchor}
           open={Boolean(importMenuAnchor)}
@@ -592,11 +800,11 @@ const WeightHistory = () => {
           </MenuItem>
         </Menu>
       </Box>
-      
+
       {filteredRecords.length === 0 ? (
-        <Paper sx={{ p: 3, textAlign: 'center' }}>
+        <Paper sx={{ p: 3, textAlign: "center" }}>
           <Typography variant="h6">
-            {records.length === 0 ? '还没有记录数据' : '没有找到匹配的记录'}
+            {records.length === 0 ? "还没有记录数据" : "没有找到匹配的记录"}
           </Typography>
           {records.length === 0 && (
             <Typography variant="body1" sx={{ mt: 1 }}>
@@ -613,18 +821,43 @@ const WeightHistory = () => {
                   <Checkbox
                     checked={selectAll}
                     onChange={handleSelectAll}
-                    indeterminate={selectedRecords.length > 0 && selectedRecords.length < filteredRecords.length}
+                    indeterminate={
+                      selectedRecords.length > 0 &&
+                      selectedRecords.length < filteredRecords.length
+                    }
                   />
                 </TableCell>
                 <TableCell>日期</TableCell>
                 <TableCell>体重 (kg)</TableCell>
                 <TableCell>变化</TableCell>
-                <TableCell align="center"><Tooltip title="饮食评分"><RestaurantIcon /></Tooltip></TableCell>
-                <TableCell align="center"><Tooltip title="饮水评分"><WaterDropIcon /></Tooltip></TableCell>
-                <TableCell align="center"><Tooltip title="运动评分"><FitnessCenterIcon /></Tooltip></TableCell>
-                <TableCell align="center"><Tooltip title="心情评分"><FavoriteIcon /></Tooltip></TableCell>
-                <TableCell align="center"><Tooltip title="睡眠评分"><BedtimeIcon /></Tooltip></TableCell>
-                <TableCell align="center"><Tooltip title="排便情况">💩</Tooltip></TableCell>
+                <TableCell align="center">
+                  <Tooltip title="饮食评分">
+                    <RestaurantIcon />
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center">
+                  <Tooltip title="饮水评分">
+                    <WaterDropIcon />
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center">
+                  <Tooltip title="运动评分">
+                    <FitnessCenterIcon />
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center">
+                  <Tooltip title="心情评分">
+                    <FavoriteIcon />
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center">
+                  <Tooltip title="睡眠评分">
+                    <BedtimeIcon />
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center">
+                  <Tooltip title="排便情况">💩</Tooltip>
+                </TableCell>
                 <TableCell>备注</TableCell>
                 <TableCell align="right">操作</TableCell>
               </TableRow>
@@ -632,7 +865,7 @@ const WeightHistory = () => {
             <TableBody>
               {filteredRecords.map((record, index) => {
                 const weightChange = getWeightChange(index);
-                
+
                 return (
                   <TableRow key={record.id}>
                     <TableCell padding="checkbox">
@@ -641,65 +874,116 @@ const WeightHistory = () => {
                         onChange={() => handleSelectRecord(record.id)}
                       />
                     </TableCell>
-                    <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{showWeight ? record.weight : '******'}</TableCell>
+                    <TableCell>
+                      {new Date(record.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {showWeight ? record.weight : "******"}
+                    </TableCell>
                     <TableCell>
                       {weightChange && (
-                        <Chip 
-                          label={showWeight ? `${weightChange.isGain ? '+' : '-'}${Math.abs(weightChange.value)} kg` : '******'}
-                          color={weightChange.isGain ? 'error' : 'success'}
+                        <Chip
+                          label={
+                            showWeight
+                              ? `${weightChange.isGain ? "+" : "-"}${Math.abs(
+                                  weightChange.value
+                                )} kg`
+                              : "******"
+                          }
+                          color={weightChange.isGain ? "error" : "success"}
                           size="small"
                         />
                       )}
                     </TableCell>
                     <TableCell align="center">
                       {record.diet_score !== null ? (
-                        <Rating value={record.diet_score} readOnly max={10} size="small" />
-                      ) : '-'}
+                        <Rating
+                          value={record.diet_score}
+                          readOnly
+                          max={10}
+                          size="small"
+                        />
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {record.water_score !== null ? (
-                        <Rating value={record.water_score} readOnly max={10} size="small" />
-                      ) : '-'}
+                        <Rating
+                          value={record.water_score}
+                          readOnly
+                          max={10}
+                          size="small"
+                        />
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {record.exercise_score !== null ? (
-                        <Rating value={record.exercise_score} readOnly max={10} size="small" />
-                      ) : '-'}
+                        <Rating
+                          value={record.exercise_score}
+                          readOnly
+                          max={10}
+                          size="small"
+                        />
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {record.mood_score !== null ? (
-                        <Rating 
-                          value={record.mood_score} 
-                          readOnly 
-                          max={10} 
+                        <Rating
+                          value={record.mood_score}
+                          readOnly
+                          max={10}
                           size="small"
                           icon={<FavoriteIcon fontSize="inherit" />}
                           emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
                         />
-                      ) : '-'}
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {record.sleep_condition !== null ? (
-                        <Rating 
-                          value={record.sleep_condition} 
-                          readOnly 
-                          max={10} 
+                        <Rating
+                          value={record.sleep_condition}
+                          readOnly
+                          max={10}
                           size="small"
                         />
-                      ) : '-'}
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {record.has_bowel_movement !== null ? (
-                        record.has_bowel_movement ? 
-                          <CheckCircleIcon color="success" fontSize={isMobile ? "small" : "medium"} /> : 
-                          <CancelIcon color="error" fontSize={isMobile ? "small" : "medium"} />
-                      ) : '-'}
+                        record.has_bowel_movement ? (
+                          <CheckCircleIcon
+                            color="success"
+                            fontSize={isMobile ? "small" : "medium"}
+                          />
+                        ) : (
+                          <CancelIcon
+                            color="error"
+                            fontSize={isMobile ? "small" : "medium"}
+                          />
+                        )
+                      ) : (
+                        "-"
+                      )}
                     </TableCell>
-                    <TableCell>{isMobile ? (record.notes ? '...' : '-') : (record.notes || '-')}</TableCell>
+                    <TableCell>
+                      {isMobile
+                        ? record.notes
+                          ? "..."
+                          : "-"
+                        : record.notes || "-"}
+                    </TableCell>
                     <TableCell align="right">
-                      <IconButton 
-                        aria-label="delete" 
+                      <IconButton
+                        aria-label="delete"
                         onClick={() => handleDeleteClick(record.id)}
                         color="error"
                         size="small"
@@ -714,12 +998,9 @@ const WeightHistory = () => {
           </Table>
         </TableContainer>
       )}
-      
+
       {/* 删除确认对话框 */}
-      <Dialog
-        open={deleteDialog.open}
-        onClose={handleDeleteCancel}
-      >
+      <Dialog open={deleteDialog.open} onClose={handleDeleteCancel}>
         <DialogTitle>确认删除</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -735,14 +1016,12 @@ const WeightHistory = () => {
       </Dialog>
 
       {/* 批量删除确认对话框 */}
-      <Dialog
-        open={bulkDeleteDialog.open}
-        onClose={handleBulkDeleteCancel}
-      >
+      <Dialog open={bulkDeleteDialog.open} onClose={handleBulkDeleteCancel}>
         <DialogTitle>确认批量删除</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            你确定要删除选中的 {bulkDeleteDialog.recordIds.length} 条记录吗？此操作无法撤销。
+            你确定要删除选中的 {bulkDeleteDialog.recordIds.length}{" "}
+            条记录吗？此操作无法撤销。
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -754,10 +1033,7 @@ const WeightHistory = () => {
       </Dialog>
 
       {/* 导出Excel对话框 */}
-      <Dialog
-        open={exportDialog}
-        onClose={handleExportCancel}
-      >
+      <Dialog open={exportDialog} onClose={handleExportCancel}>
         <DialogTitle>导出Excel</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
@@ -776,7 +1052,11 @@ const WeightHistory = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleExportCancel}>取消</Button>
-          <Button onClick={handleExportConfirm} color="primary" variant="contained">
+          <Button
+            onClick={handleExportConfirm}
+            color="primary"
+            variant="contained"
+          >
             导出
           </Button>
         </DialogActions>

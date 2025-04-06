@@ -14,8 +14,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
-  const [showWeightYAxis, setShowWeightYAxis] = useState(true);
-  const [showWeightStats, setShowWeightStats] = useState(true);
+  const [showWeightYAxis, setShowWeightYAxis] = useState(false);
+  const [showWeightStats, setShowWeightStats] = useState(false);
   const [stats, setStats] = useState({
     currentWeight: 0,
     startWeight: 0,
