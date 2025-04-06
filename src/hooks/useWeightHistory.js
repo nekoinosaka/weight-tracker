@@ -8,6 +8,10 @@ export const useWeightHistory = (user) => {
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+    endDate: new Date(),
+  });
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     recordId: null,
@@ -20,7 +24,7 @@ export const useWeightHistory = (user) => {
   const [selectAll, setSelectAll] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const [importMenuAnchor, setImportMenuAnchor] = useState(null);
-  const [showWeight, setShowWeight] = useState(false);
+  const [showWeight, setShowWeight] = useState(true);
   const [exportFileName, setExportFileName] = useState("健康记录数据");
   const [exportDialog, setExportDialog] = useState(false);
 
@@ -29,10 +33,11 @@ export const useWeightHistory = (user) => {
   }, [user]);
 
   useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredRecords(records);
-    } else {
-      const filtered = records.filter((record) => {
+    let filtered = records;
+
+    // 应用搜索条件
+    if (searchTerm.trim() !== "") {
+      filtered = filtered.filter((record) => {
         const date = new Date(record.date).toLocaleDateString();
         const weight = record.weight.toString();
         const notes = record.notes || "";
@@ -54,9 +59,18 @@ export const useWeightHistory = (user) => {
           sleepScore.includes(searchTerm)
         );
       });
-      setFilteredRecords(filtered);
     }
-  }, [searchTerm, records]);
+
+    // 应用日期范围筛选
+    filtered = filtered.filter((record) => {
+      const recordDate = new Date(record.date);
+      return (
+        recordDate >= dateRange.startDate && recordDate <= dateRange.endDate
+      );
+    });
+
+    setFilteredRecords(filtered);
+  }, [searchTerm, records, dateRange]);
 
   const fetchRecords = async () => {
     try {
@@ -470,5 +484,7 @@ export const useWeightHistory = (user) => {
     getWeightChange,
     toggleShowWeight,
     setExportFileName,
+    dateRange,
+    setDateRange,
   };
 };

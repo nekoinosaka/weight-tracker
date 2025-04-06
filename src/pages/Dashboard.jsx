@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid, CircularProgress, Card, CardContent, Tabs, Tab, FormControlLabel, Checkbox } from '@mui/material';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 import { useAuth } from '../contexts/AuthContext';
 import { recordService } from '../services/supabase';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -14,8 +17,12 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
-  const [showWeightYAxis, setShowWeightYAxis] = useState(false);
-  const [showWeightStats, setShowWeightStats] = useState(false);
+  const [showWeightYAxis, setShowWeightYAxis] = useState(true);
+  const [showWeightStats, setShowWeightStats] = useState(true);
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(new Date().setDate(new Date().getDate() - 30)),
+    endDate: new Date()
+  });
   const [stats, setStats] = useState({
     currentWeight: 0,
     startWeight: 0,
@@ -105,7 +112,12 @@ const Dashboard = () => {
   }, [user]);
 
   // 为图表准备数据
-  const weightChartData = records.map(record => ({
+  const filteredRecords = records.filter(record => {
+    const recordDate = new Date(record.date);
+    return recordDate >= dateRange.startDate && recordDate <= dateRange.endDate;
+  });
+
+  const weightChartData = filteredRecords.map(record => ({
     date: new Date(record.date).toLocaleDateString(),
     weight: record.weight
   })).reverse(); // 反转以便在图表上从左到右显示时间
@@ -147,6 +159,33 @@ const Dashboard = () => {
         <>
           {/* 显示控制 */}
           <Grid container spacing={3} sx={{ mb: 2, alignItems: 'center' }}>
+            <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="开始日期"
+                  value={dayjs(dateRange.startDate)}
+                  onChange={(newValue) => setDateRange(prev => ({
+                    ...prev,
+                    startDate: newValue.toDate()
+                  }))}
+                  maxDate={dayjs(dateRange.endDate)}
+                />
+              </LocalizationProvider>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="结束日期"
+                  value={dayjs(dateRange.endDate)}
+                  onChange={(newValue) => setDateRange(prev => ({
+                    ...prev,
+                    endDate: newValue.toDate()
+                  }))}
+                  minDate={dayjs(dateRange.startDate)}
+                  maxDate={dayjs()}
+                />
+              </LocalizationProvider>
+            </Grid>
             <Grid item>
               <FormControlLabel
                 control={

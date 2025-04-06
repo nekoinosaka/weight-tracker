@@ -30,6 +30,9 @@ import {
   useTheme,
   Switch,
 } from "@mui/material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import SearchIcon from "@mui/icons-material/Search";
@@ -86,6 +89,8 @@ const WeightHistory = () => {
     getWeightChange,
     toggleShowWeight,
     setExportFileName,
+    setDateRange,
+    dateRange,
   } = useWeightHistory(user);
 
   if (loading) {
@@ -237,25 +242,54 @@ const WeightHistory = () => {
           gap: 1,
         }}
       >
-        <TextField
-          placeholder="搜索记录..."
-          variant="outlined"
-          size="small"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          sx={{
-            flexGrow: 1,
-            maxWidth: { xs: "100%", sm: 300 },
-            mb: { xs: 1, sm: 0 },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
+        <Box sx={{ display: "flex", gap: 2, mb: 2, flexGrow: 1 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="开始日期"
+              value={dayjs(dateRange.startDate)}
+              onChange={(newValue) => {
+                setDateRange((prev) => ({
+                  ...prev,
+                  startDate: newValue.toDate(),
+                }));
+              }}
+              maxDate={dayjs(dateRange.endDate)}
+              sx={{ minWidth: 180 }}
+            />
+            <DatePicker
+              label="结束日期"
+              value={dayjs(dateRange.endDate)}
+              onChange={(newValue) => {
+                setDateRange((prev) => ({
+                  ...prev,
+                  endDate: newValue.toDate(),
+                }));
+              }}
+              minDate={dayjs(dateRange.startDate)}
+              maxDate={dayjs()}
+              sx={{ minWidth: 180 }}
+            />
+          </LocalizationProvider>
+          <TextField
+            placeholder="搜索记录..."
+            variant="outlined"
+            size="small"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            sx={{
+              flexGrow: 1,
+              maxWidth: { xs: "100%", sm: 300 },
+              mb: { xs: 1, sm: 0 },
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
 
         <FormControlLabel
           control={
