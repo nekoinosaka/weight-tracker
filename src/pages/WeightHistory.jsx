@@ -13,6 +13,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import BedtimeIcon from '@mui/icons-material/Bedtime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -674,6 +675,7 @@ const WeightHistory = () => {
                           max={10} 
                           size="small"
                           icon={<FavoriteIcon fontSize="inherit" />}
+                          emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
                         />
                       ) : '-'}
                     </TableCell>
