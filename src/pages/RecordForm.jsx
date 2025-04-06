@@ -150,10 +150,27 @@ const RecordForm = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>记录健康数据</Typography>
+    <Box sx={{ width: '100%' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', textAlign: { xs: 'center', sm: 'left' }, mb: 3 }}>记录健康数据</Typography>
       
-      <Paper sx={{ p: 3, maxWidth: 600, mx: 'auto' }}>
+      <Paper sx={{ 
+        p: { xs: 3, sm: 4 }, 
+        maxWidth: 600, 
+        mx: 'auto',
+        borderRadius: 2,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        overflow: 'hidden',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '4px',
+          background: 'linear-gradient(90deg, #2196f3 0%, #64b5f6 100%)',
+        }
+      }}>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
@@ -182,17 +199,27 @@ const RecordForm = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
+              <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 'medium', color: 'primary.main', display: 'flex', alignItems: 'center' }}>
                 <RestaurantIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
                 饮食评分 (1-10)
               </Typography>
-              <Box sx={{ px: 2 }}>
+              <Box sx={{ px: { xs: 0, sm: 2 }, py: 1, bgcolor: 'rgba(33, 150, 243, 0.04)', borderRadius: 1 }}>
                 <Rating
                   name="diet_score"
                   value={formData.diet_score}
                   onChange={handleRatingChange('diet_score')}
                   max={10}
-                  size="large"
+                  size="medium"
+                  sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'row',
+                    '& .MuiRating-iconFilled': {
+                      color: 'primary.main',
+                    },
+                    '& .MuiRating-iconHover': {
+                      color: 'primary.light',
+                    }
+                  }}
                 />
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   1 = 很差 (暴饮暴食), 10 = 非常好 (均衡健康饮食)
@@ -205,13 +232,14 @@ const RecordForm = () => {
                 <WaterDropIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
                 饮水评分 (1-10)
               </Typography>
-              <Box sx={{ px: 2 }}>
+              <Box sx={{ px: { xs: 0, sm: 2 } }}>
                 <Rating
                   name="water_score"
                   value={formData.water_score}
                   onChange={handleRatingChange('water_score')}
                   max={10}
-                  size="large"
+                  size="medium"
+                  sx={{ display: 'flex', flexDirection: 'row' }}
                 />
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   1 = 很少 (几乎没喝水), 10 = 充足 (2升以上)
@@ -224,13 +252,14 @@ const RecordForm = () => {
                 <FitnessCenterIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
                 运动评分 (1-10)
               </Typography>
-              <Box sx={{ px: 2 }}>
+              <Box sx={{ px: { xs: 0, sm: 2 } }}>
                 <Rating
                   name="exercise_score"
                   value={formData.exercise_score}
                   onChange={handleRatingChange('exercise_score')}
                   max={10}
-                  size="large"
+                  size="medium"
+                  sx={{ display: 'flex', flexDirection: 'row' }}
                 />
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   1 = 无运动, 10 = 高强度运动
@@ -243,7 +272,7 @@ const RecordForm = () => {
                 <FavoriteIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
                 心情评分 (1-10)
               </Typography>
-              <Box sx={{ px: 2 }}>
+              <Box sx={{ px: { xs: 0, sm: 2 } }}>
                 <Rating
                   name="mood_score"
                   value={formData.mood_score}
@@ -251,7 +280,8 @@ const RecordForm = () => {
                   max={10}
                   icon={<FavoriteIcon fontSize="inherit" />}
                   emptyIcon={<FavoriteBorderIcon fontSize="inherit" />}
-                  size="large"
+                  size="medium"
+                  sx={{ display: 'flex', flexDirection: 'row' }}
                 />
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   1 = 非常糟糕, 10 = 非常愉快
@@ -264,13 +294,14 @@ const RecordForm = () => {
                 <BedtimeIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
                 睡眠评分 (1-10)
               </Typography>
-              <Box sx={{ px: 2 }}>
+              <Box sx={{ px: { xs: 0, sm: 2 } }}>
                 <Rating
                   name="sleep_condition"
                   value={formData.sleep_condition}
                   onChange={handleRatingChange('sleep_condition')}
                   max={10}
-                  size="large"
+                  size="medium"
+                  sx={{ display: 'flex', flexDirection: 'row' }}
                 />
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   1 = 睡眠质量差, 10 = 睡眠质量好
@@ -312,6 +343,19 @@ const RecordForm = () => {
                 color="primary" 
                 fullWidth
                 disabled={loading}
+                sx={{
+                  mt: 2,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  borderRadius: 2,
+                  boxShadow: '0 4px 10px rgba(33, 150, 243, 0.3)',
+                  '&:hover': {
+                    boxShadow: '0 6px 15px rgba(33, 150, 243, 0.4)',
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.3s ease'
+                }}
               >
                 {loading ? '保存中...' : '保存记录'}
               </Button>

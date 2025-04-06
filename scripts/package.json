@@ -1,0 +1,10 @@
+{
+  "name": "font-optimizer",
+  "type": "module",
+  "dependencies": {
+    "fontmin": "^0.9.9"
+  },
+  "scripts": {
+    "optimize": "node optimize-font.js"
+  }
+}

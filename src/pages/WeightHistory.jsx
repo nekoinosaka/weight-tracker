@@ -4,7 +4,7 @@ import {
   TableHead, TableRow, IconButton, Chip, TextField, InputAdornment,
   Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
   Button, CircularProgress, Rating, Tooltip, Stack, Menu, MenuItem,
-  Checkbox, FormControlLabel
+  Checkbox, FormControlLabel, useMediaQuery, useTheme
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
@@ -24,6 +24,8 @@ import { recordService } from '../services/supabase';
 
 const WeightHistory = () => {
   const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -430,16 +432,22 @@ const WeightHistory = () => {
   }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>体重历史</Typography>
+    <Box sx={{ width: '100%' }}>
+      <Typography variant="h4" gutterBottom>体重历史记录</Typography>
       
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+      {/* 搜索和批量操作工具栏 */}
+      <Box sx={{ display: 'flex', mb: 2, alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
         <TextField
-          fullWidth
+          placeholder="搜索记录..."
           variant="outlined"
-          placeholder="搜索日期、体重或备注..."
+          size="small"
           value={searchTerm}
           onChange={handleSearchChange}
+          sx={{ 
+            flexGrow: 1, 
+            maxWidth: { xs: '100%', sm: 300 },
+            mb: { xs: 1, sm: 0 }
+          }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -509,7 +517,7 @@ const WeightHistory = () => {
             />
           </MenuItem>
         </Menu>
-      </Stack>
+      </Box>
       
       {filteredRecords.length === 0 ? (
         <Paper sx={{ p: 3, textAlign: 'center' }}>
@@ -609,11 +617,11 @@ const WeightHistory = () => {
                     <TableCell align="center">
                       {record.has_bowel_movement !== null ? (
                         record.has_bowel_movement ? 
-                          <CheckCircleIcon color="success" fontSize="small" /> : 
-                          <CancelIcon color="error" fontSize="small" />
+                          <CheckCircleIcon color="success" fontSize={isMobile ? "small" : "medium"} /> : 
+                          <CancelIcon color="error" fontSize={isMobile ? "small" : "medium"} />
                       ) : '-'}
                     </TableCell>
-                    <TableCell>{record.notes || '-'}</TableCell>
+                    <TableCell>{isMobile ? (record.notes ? '...' : '-') : (record.notes || '-')}</TableCell>
                     <TableCell align="right">
                       <IconButton 
                         aria-label="delete" 
@@ -621,7 +629,7 @@ const WeightHistory = () => {
                         color="error"
                         size="small"
                       >
-                        <DeleteIcon />
+                        <DeleteIcon fontSize={isMobile ? "small" : "medium"} />
                       </IconButton>
                     </TableCell>
                   </TableRow>

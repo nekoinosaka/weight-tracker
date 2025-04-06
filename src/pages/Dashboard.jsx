@@ -133,7 +133,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h4" gutterBottom>健康仪表盘</Typography>
       
       {records.length === 0 ? (
@@ -162,27 +162,35 @@ const Dashboard = () => {
 
           {/* 统计卡片 */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>当前体重</Typography>
-                  <Typography variant="h4">{showWeightStats ? stats.currentWeight : '***'} kg</Typography>
+            <Grid item xs={6} sm={6} md={3}>
+              <Card sx={{ height: '100%', p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>当前体重</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', md: '1.8rem' } }}>
+                    {showWeightStats ? stats.currentWeight : '***'} kg
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>起始体重</Typography>
-                  <Typography variant="h4">{showWeightStats ? stats.startWeight : '***'} kg</Typography>
+            <Grid item xs={6} sm={6} md={3}>
+              <Card sx={{ height: '100%', p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>起始体重</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', md: '1.8rem' } }}>
+                    {showWeightStats ? stats.startWeight : '***'} kg
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>已减重</Typography>
-                  <Typography variant="h4" color={stats.weightLost > 0 ? 'success.main' : 'error.main'}>
+            <Grid item xs={6} sm={6} md={3}>
+              <Card sx={{ height: '100%', p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>已减重</Typography>
+                  <Typography 
+                    variant="h5" 
+                    color={stats.weightLost > 0 ? 'success.main' : 'error.main'}
+                    sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', md: '1.8rem' } }}
+                  >
                     {showWeightStats ? 
                       (stats.weightLost > 0 ? `-${stats.weightLost.toFixed(2)}` : `+${Math.abs(stats.weightLost).toFixed(2)}`) 
                       : '***'} kg
@@ -190,11 +198,13 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>平均体重</Typography>
-                  <Typography variant="h4">{showWeightStats ? stats.averageWeight : '***'} kg</Typography>
+            <Grid item xs={6} sm={6} md={3}>
+              <Card sx={{ height: '100%', p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>平均体重</Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', md: '1.8rem' } }}>
+                    {showWeightStats ? stats.averageWeight : '***'} kg
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -203,46 +213,38 @@ const Dashboard = () => {
           {/* 健康评分卡片 */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                  <RestaurantIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Box>
-                    <Typography color="textSecondary" gutterBottom>平均饮食评分</Typography>
-                    <Typography variant="h4">{stats.avgDietScore}/10</Typography>
-                  </Box>
+              <Card sx={{ p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <RestaurantIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>平均饮食评分</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.avgDietScore}/10</Typography>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                  <WaterDropIcon sx={{ mr: 1, color: 'info.main' }} />
-                  <Box>
-                    <Typography color="textSecondary" gutterBottom>平均饮水评分</Typography>
-                    <Typography variant="h4">{stats.avgWaterScore}/10</Typography>
-                  </Box>
+              <Card sx={{ p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <WaterDropIcon sx={{ fontSize: 40, color: 'primary.light', mb: 1 }} />
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>平均饮水评分</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.avgWaterScore}/10</Typography>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                  <FitnessCenterIcon sx={{ mr: 1, color: 'success.main' }} />
-                  <Box>
-                    <Typography color="textSecondary" gutterBottom>平均运动评分</Typography>
-                    <Typography variant="h4">{stats.avgExerciseScore}/10</Typography>
-                  </Box>
+              <Card sx={{ p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <FitnessCenterIcon sx={{ fontSize: 40, color: 'primary.dark', mb: 1 }} />
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>平均运动评分</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.avgExerciseScore}/10</Typography>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                  <FavoriteIcon sx={{ mr: 1, color: 'error.main' }} />
-                  <Box>
-                    <Typography color="textSecondary" gutterBottom>平均心情评分</Typography>
-                    <Typography variant="h4">{stats.avgMoodScore}/10</Typography>
-                  </Box>
+              <Card sx={{ p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <FavoriteIcon sx={{ fontSize: 40, color: 'secondary.main', mb: 1 }} />
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>平均心情评分</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.avgMoodScore}/10</Typography>
                 </CardContent>
               </Card>
             </Grid>
@@ -251,33 +253,54 @@ const Dashboard = () => {
           {/* 睡眠评分卡片 */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                  <BedtimeIcon sx={{ mr: 1, color: 'secondary.main' }} />
-                  <Box>
-                    <Typography color="textSecondary" gutterBottom>平均睡眠评分</Typography>
-                    <Typography variant="h4">{stats.avgSleepScore}/10</Typography>
-                  </Box>
+              <Card sx={{ p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <BedtimeIcon sx={{ fontSize: 40, color: 'primary.dark', mb: 1 }} />
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>平均睡眠评分</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.avgSleepScore}/10</Typography>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
-                <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                    <Typography color="textSecondary" gutterBottom>排便情况</Typography>
-                    <Typography variant="h4" sx={{ ml: 2 }}>{stats.bowelPercentage}%</Typography>
+              <Card sx={{ p: 1 }}>
+                <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: 'primary.light', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
+                    <Typography variant="h6" color="white">%</Typography>
                   </Box>
+                  <Typography color="primary.main" gutterBottom variant="subtitle2" sx={{ fontWeight: 'medium' }}>排便情况</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{stats.bowelPercentage}%</Typography>
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
 
           {/* 图表选项卡 */}
-          <Paper sx={{ p: 3 }}>
-            <Tabs value={activeTab} onChange={handleTabChange} centered sx={{ mb: 2 }}>
+          <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+            <Tabs 
+              value={activeTab} 
+              onChange={handleTabChange} 
+              centered 
+              sx={{ 
+                mb: 3,
+                '& .MuiTabs-indicator': {
+                  backgroundColor: 'primary.main',
+                  height: 3,
+                  borderRadius: 1.5,
+                },
+                '& .MuiTab-root': {
+                  fontWeight: 'medium',
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  minWidth: 100,
+                  '&.Mui-selected': {
+                    color: 'primary.main',
+                    fontWeight: 'bold',
+                  },
+                },
+              }}
+            >
               <Tab label="体重趋势" />
-              <Tab label="健康评分趋势" />
+              <Tab label="健康评分" />
             </Tabs>
             
             {activeTab === 0 ? (
@@ -290,27 +313,30 @@ const Dashboard = () => {
                       onChange={(e) => setShowWeightYAxis(e.target.checked)}
                     />
                   }
-                  label="显示具体体重"
+                  label="显示体重数值"
                   sx={{ mb: 2 }}
                 />
-                <Box sx={{ height: 300 }}>
+                <Box sx={{ height: { xs: 250, sm: 300 }, width: '100%', overflow: 'hidden' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                       data={weightChartData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
+                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                       <YAxis 
                         domain={['dataMin - 1', 'dataMax + 1']}
                         tickFormatter={(value) => showWeightYAxis ? value : '***'}
+                        tick={{ fontSize: 12 }}
                       />
                       <Tooltip formatter={(value) => showWeightYAxis ? value : '***'} />
                       <Line
                         type="monotone"
                         dataKey="weight"
-                        stroke="#4caf50"
-                        activeDot={{ r: 8 }}
+                        stroke="#2196f3"
+                        strokeWidth={2}
+                        activeDot={{ r: 8, fill: '#1976d2' }}
+                        name="体重 (kg)"
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -319,21 +345,21 @@ const Dashboard = () => {
             ) : (
               <Box>
                 <Typography variant="h6" gutterBottom>健康评分趋势</Typography>
-                <Box sx={{ height: 300 }}>
+                <Box sx={{ height: { xs: 250, sm: 300 }, width: '100%', overflow: 'hidden' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={healthScoreChartData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 5, right: 5, left: 0, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis domain={[0, 10]} />
-                      <Tooltip formatter={(value) => showWeightYAxis ? value : '***'} />
-                      <Bar dataKey="饮食" fill="#8884d8" />
-                      <Bar dataKey="饮水" fill="#2196f3" />
-                      <Bar dataKey="运动" fill="#4caf50" />
+                      <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                      <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} />
+                      <Tooltip />
+                      <Bar dataKey="饮食" fill="#2196f3" />
+                      <Bar dataKey="饮水" fill="#64b5f6" />
+                      <Bar dataKey="运动" fill="#1976d2" />
                       <Bar dataKey="心情" fill="#f44336" />
-                      <Bar dataKey="睡眠" fill="#9c27b0" />
+                      <Bar dataKey="睡眠" fill="#9575cd" />
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>

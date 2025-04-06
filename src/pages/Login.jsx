@@ -88,13 +88,70 @@ const Login = () => {
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h4" gutterBottom>
+      <Box sx={{ 
+        mt: { xs: 4, sm: 8 }, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center' 
+      }}>
+        <Typography 
+          component="h1" 
+          variant="h4" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 'bold', 
+            color: 'primary.main',
+            textAlign: 'center',
+            mb: 3
+          }}
+        >
           减肥记录助手
         </Typography>
         
-        <Paper elevation={3} sx={{ p: 4, width: '100%', mt: 2 }}>
-          <Tabs value={isLogin ? 0 : 1} onChange={handleTabChange} centered sx={{ mb: 3 }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: { xs: 3, sm: 4 }, 
+            width: '100%', 
+            mt: 2,
+            borderRadius: 3,
+            boxShadow: '0 8px 40px rgba(0,0,0,0.12)',
+            overflow: 'hidden',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, #2196f3 0%, #64b5f6 100%)',
+            }
+          }}
+        >
+          <Tabs 
+            value={isLogin ? 0 : 1} 
+            onChange={handleTabChange} 
+            centered 
+            sx={{ 
+              mb: 3,
+              '& .MuiTabs-indicator': {
+                backgroundColor: 'primary.main',
+                height: 3,
+                borderRadius: 1.5,
+              },
+              '& .MuiTab-root': {
+                fontWeight: 'medium',
+                fontSize: '1rem',
+                textTransform: 'none',
+                minWidth: 100,
+                '&.Mui-selected': {
+                  color: 'primary.main',
+                  fontWeight: 'bold',
+                },
+              },
+            }}
+          >
             <Tab label="登录" />
             <Tab label="注册" />
           </Tabs>
@@ -135,11 +192,25 @@ const Login = () => {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ 
+                mt: 3, 
+                mb: 2,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                borderRadius: 2,
+                boxShadow: '0 4px 10px rgba(33, 150, 243, 0.3)',
+                background: 'linear-gradient(45deg, #2196f3 30%, #64b5f6 90%)',
+                '&:hover': {
+                  boxShadow: '0 6px 15px rgba(33, 150, 243, 0.4)',
+                  transform: 'translateY(-2px)',
+                },
+                transition: 'all 0.3s ease'
+              }}
               disabled={loading}
             >
               {loading ? (
-                <CircularProgress size={24} />
+                <CircularProgress size={24} color="inherit" />
               ) : (
                 isLogin ? '登录' : '注册'
               )}

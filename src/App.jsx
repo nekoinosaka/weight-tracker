@@ -1,19 +1,10 @@
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes";
 import { AuthProvider } from "./contexts/AuthContext";
 import Layout from "./components/common/Layout";
+import theme from "./theme";
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#4caf50", // 健康相关的绿色
-    },
-    secondary: {
-      main: "#2196f3", // 蓝色
-    },
-  },
-});
 
 function App() {
   return (
