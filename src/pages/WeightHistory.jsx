@@ -18,6 +18,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import * as XLSX from 'xlsx';
 import { useAuth } from '../contexts/AuthContext';
 import { recordService } from '../services/supabase';
@@ -43,6 +44,8 @@ const WeightHistory = () => {
   const [importLoading, setImportLoading] = useState(false);
   const [importMenuAnchor, setImportMenuAnchor] = useState(null);
   const [showWeight, setShowWeight] = useState(true); // 添加控制体重显示的状态
+  const [exportFileName, setExportFileName] = useState('健康记录数据');
+  const [exportDialog, setExportDialog] = useState(false);
 
   useEffect(() => {
     fetchRecords();
@@ -409,6 +412,66 @@ const WeightHistory = () => {
   // 兼容旧版本的导入函数
   const handleImport = handleJsonImport;
 
+  // 导出Excel功能
+  const handleExportExcel = () => {
+    // 打开导出对话框
+    setExportDialog(true);
+  };
+
+  // 确认导出Excel
+  const handleExportConfirm = () => {
+    try {
+      // 准备导出数据
+      const exportData = filteredRecords.map(record => ({
+        '日期': new Date(record.date).toLocaleDateString(),
+        '体重(kg)': record.weight,
+        '饮食评分': record.diet_score || 0,
+        '饮水评分': record.water_score || 0,
+        '运动评分': record.exercise_score || 0,
+        '心情评分': record.mood_score || 0,
+        '睡眠评分': record.sleep_condition || 0,
+        '排便情况': record.has_bowel_movement ? '是' : '否',
+        '备注': record.notes || ''
+      }));
+
+      // 创建工作表
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      
+      // 设置列宽
+      const columnWidths = [
+        { wch: 12 }, // 日期
+        { wch: 10 }, // 体重
+        { wch: 10 }, // 饮食评分
+        { wch: 10 }, // 饮水评分
+        { wch: 10 }, // 运动评分
+        { wch: 10 }, // 心情评分
+        { wch: 10 }, // 睡眠评分
+        { wch: 10 }, // 排便情况
+        { wch: 30 }  // 备注
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // 创建工作簿
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, '健康记录');
+
+      // 生成Excel文件并下载
+      XLSX.writeFile(workbook, `${exportFileName}.xlsx`);
+
+      // 关闭对话框
+      setExportDialog(false);
+    } catch (error) {
+      console.error('导出Excel失败:', error);
+      alert(`导出失败: ${error.message}`);
+      setExportDialog(false);
+    }
+  };
+
+  // 取消导出
+  const handleExportCancel = () => {
+    setExportDialog(false);
+  };
+
   // 计算体重变化
   const getWeightChange = (index) => {
     if (index === filteredRecords.length - 1) return null; // 第一条记录没有变化
@@ -478,6 +541,16 @@ const WeightHistory = () => {
           sx={{ minWidth: '120px' }}
         >
           {importLoading ? '导入中...' : '导入数据'}
+        </Button>
+        
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<FileDownloadIcon />}
+          onClick={handleExportExcel}
+          sx={{ minWidth: '120px' }}
+        >
+          导出Excel
         </Button>
         
         <Button
@@ -674,6 +747,35 @@ const WeightHistory = () => {
           <Button onClick={handleBulkDeleteCancel}>取消</Button>
           <Button onClick={handleBulkDeleteConfirm} color="error" autoFocus>
             批量删除
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 导出Excel对话框 */}
+      <Dialog
+        open={exportDialog}
+        onClose={handleExportCancel}
+      >
+        <DialogTitle>导出Excel</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            请输入要导出的Excel文件名：
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="文件名"
+            fullWidth
+            variant="outlined"
+            value={exportFileName}
+            onChange={(e) => setExportFileName(e.target.value)}
+            helperText="文件将以.xlsx格式保存"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleExportCancel}>取消</Button>
+          <Button onClick={handleExportConfirm} color="primary" variant="contained">
+            导出
           </Button>
         </DialogActions>
       </Dialog>
