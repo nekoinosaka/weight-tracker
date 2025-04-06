@@ -6,6 +6,6 @@
   font-display: swap; /* 优化字体加载显示策略 */
 }
 
-body {
-  font-family: 'LeeeafHei', sans-serif;
+* {
+  font-family: 'LeeeafHei', sans-serif !important;
 }
