@@ -1,32 +1,36 @@
-name: CI/CD
+name: CI & Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main  # 你的主分支
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'pnpm'
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+    - name: Install pnpm
+      run: npm install -g pnpm
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+    - name: Install dependencies
+      run: pnpm install
 
-      - name: Build project
-        run: pnpm build
+    - name: Build
+      run: pnpm build
 
-      - name: Build Docker image
-        run: docker build -t myapp .
-
-      # 这里可以加推送到 Docker Hub 的步骤
+    # 🔹 部署到 GitHub Pages
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages    # GitHub Pages 会用这个分支
+        folder: dist        # Vite 打包目录

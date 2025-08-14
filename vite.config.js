@@ -74,4 +74,5 @@ export default defineConfig({
     }
   })
   ],
+   base: '/weight-tracker/',
 });
