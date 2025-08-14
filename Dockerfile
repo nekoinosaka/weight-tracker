@@ -2,18 +2,23 @@
 FROM node AS build-stage
 WORKDIR /app
 
-# 先复制依赖文件，利用缓存
-COPY package*.json ./
-RUN npm install
+# 安装 pnpm
+RUN npm install -g pnpm
 
-# 复制全部源码
+# 先复制依赖文件（利用缓存）
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# 复制源码
 COPY . .
 
 # 构建 Vue 项目
-RUN npm run build
+RUN pnpm build
 
 # 2️⃣ 生产环境阶段
 FROM nginx:alpine AS production-stage
+
+# 复制打包好的文件到 Nginx
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 
 # 自定义 Nginx 配置（可选）
