@@ -21,6 +21,10 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 8
+      - name: Create env file
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" >> .env
+          echo "VITE_SUPABASE_KEY=${{ secrets.VITE_SUPABASE_KEY }}" >> .env
 
       - name: Install dependencies
         run: pnpm install
