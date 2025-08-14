@@ -3,7 +3,7 @@ name: CI & Deploy
 on:
   push:
     branches:
-      - main  # 你的主分支
+      - main
 
 jobs:
   build:
@@ -13,14 +13,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Setup Node
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: 18
         cache: 'pnpm'
 
     - name: Install pnpm
-      run: npm install -g pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
 
     - name: Install dependencies
       run: pnpm install
@@ -28,9 +30,8 @@ jobs:
     - name: Build
       run: pnpm build
 
-    # 🔹 部署到 GitHub Pages
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-        branch: gh-pages    # GitHub Pages 会用这个分支
-        folder: dist        # Vite 打包目录
+        branch: gh-pages
+        folder: dist
