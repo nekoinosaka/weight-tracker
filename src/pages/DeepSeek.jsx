@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Typography, Paper, TextField, Button, CircularProgress } from '@mui/material';
-import { getDeepseek } from '../services/deepseek';
+import { getDeepseekStream } from '../services/deepseek';
 
 const DeepSeek = () => {
   const [prompt, setPrompt] = useState('');
@@ -14,19 +14,28 @@ const DeepSeek = () => {
 
     setLoading(true);
     setError(null);
+    setResponse(''); // 清空之前的响应
     
     try {
-      const { data, error } = await getDeepseek(prompt);
-      
-      if (error) {
-        throw new Error(error.message || '请求失败');
-      }
-      
-      setResponse(data || '没有找到答案');
+      await getDeepseekStream(
+        prompt,
+        (chunk) => {
+          // 实时更新响应内容
+          setResponse(prev => prev + chunk);
+        },
+        (err) => {
+          console.error('DeepSeek API 调用错误:', err);
+          setError(err.message || '发生错误，请稍后再试');
+          setLoading(false);
+        },
+        () => {
+          // 流式完成
+          setLoading(false);
+        }
+      );
     } catch (err) {
       console.error('DeepSeek API 调用错误:', err);
       setError(err.message || '发生错误，请稍后再试');
-    } finally {
       setLoading(false);
     }
   };

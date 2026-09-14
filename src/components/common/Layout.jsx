@@ -25,6 +25,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import HistoryIcon from "@mui/icons-material/History";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
+import MessageIcon from "@mui/icons-material/Message";
 
 const Layout = ({ children }) => {
   const { user, signOut } = useAuth();
@@ -45,6 +46,7 @@ const Layout = ({ children }) => {
     { text: "仪表盘", icon: <DashboardIcon />, path: "/" },
     { text: "记录数据", icon: <AddCircleIcon />, path: "/record" },
     { text: "历史记录", icon: <HistoryIcon />, path: "/history" },
+    { text: "消息", icon: <MessageIcon />, path: "/messages" },
     { text: "AI助手", icon: <SmartToyIcon />, path: "/deepseek" },
   ];
 
@@ -158,7 +160,7 @@ const Layout = ({ children }) => {
                 button
                 key={item.text}
                 onClick={() => navigate(item.path)}
-                selected={location.pathname === item.path}
+                selected={location.pathname === item.path || location.pathname.startsWith(item.path + "/")}
                 sx={{
                   borderRadius: 2,
                   mb: 1,
@@ -183,7 +185,7 @@ const Layout = ({ children }) => {
                 <ListItemIcon
                   sx={{
                     color:
-                      location.pathname === item.path
+                      location.pathname === item.path || location.pathname.startsWith(item.path + "/")
                         ? "primary.main"
                         : "inherit",
                   }}
@@ -194,7 +196,9 @@ const Layout = ({ children }) => {
                   primary={item.text}
                   primaryTypographyProps={{
                     fontWeight:
-                      location.pathname === item.path ? "bold" : "regular",
+                      location.pathname === item.path || location.pathname.startsWith(item.path + "/")
+                        ? "bold"
+                        : "regular",
                   }}
                 />
               </ListItem>
